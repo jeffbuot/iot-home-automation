@@ -10,10 +10,20 @@
 #include <ESP8266WebServer.h>
 #include <ESP8266HTTPClient.h>
 #include <ArduinoJson.h>
+#include <SPI.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+/* For the oled display. */
+#define SCREEN_WIDTH 128 // OLED display width, in pixels
+#define SCREEN_HEIGHT 64 // OLED display height, in pixels
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 /* Set these to your desired credentials. */
-const char *ssid = "Service";  //ENTER YOUR WIFI SETTINGS
-const char *password = "JesusMoreThanEverything";
+const char *ssid = "SHSD-01";  //ENTER YOUR WIFI SETTINGS
+const char *password = "WKSHSD001";
+const char *deviceId = "shsd-01";
 
 //Link to read data from https://jsonplaceholder.typicode.com/comments?postId=7
 //Web/Server address to read/write from
@@ -25,21 +35,28 @@ const char fingerprint[] PROGMEM = "B6 F5 80 C8 B1 DA 61 C1 07 9D 80 42 D8 A9 1F
 //=======================================================================
 //                    Power on setup
 //=======================================================================
-int CH_A = 5;
-int CH_B = 4;
-int CH_C = 0;
-int CH_D = 2;
-int CH_E = 14;
-int CH_F = 12;
-
+int SSID_STAT = 16;
+int CH_A = 0;
+int CH_B = 2;
+int CH_C = 14;
+int CH_D = 12;
+int CH_E = 13;
+int CH_F = 15;
+bool a, b, c, d, e, f;
 void setup() {
+  pinMode(SSID_STAT, OUTPUT);
   pinMode(CH_A, OUTPUT);
   pinMode(CH_B, OUTPUT);
   pinMode(CH_C, OUTPUT);
   pinMode(CH_D, OUTPUT);
   pinMode(CH_E, OUTPUT);
   pinMode(CH_F, OUTPUT);
-
+  if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    Serial.println("SSD1306 allocation failed");
+    for (;;);
+  }
+  initDisplay();
+  digitalWrite(SSID_STAT, LOW);
   delay(1000);
   Serial.begin(115200);
   WiFi.mode(WIFI_OFF);        //Prevents reconnection issue (taking too long to connect)
@@ -49,11 +66,22 @@ void setup() {
   WiFi.begin(ssid, password);     //Connect to your WiFi router
   Serial.println("");
 
-  Serial.print("Connecting");
+  display.display();
+  Serial.print("Connecting to ");
+  Serial.print(ssid);
   // Wait for connection
+  int i = 0;
+  String dots = "";
   while (WiFi.status() != WL_CONNECTED) {
-    delay(500);
+    digitalWrite(SSID_STAT, HIGH);
+    delay(250);
+    digitalWrite(SSID_STAT, LOW);
+    delay(250);
     Serial.print(".");
+    i++;
+    dots = "";
+    for (int x = 0; x < i % 4; x++)dots += ".";
+    printDisplay("Connecting to wifi" + dots);
   }
 
   //If connection successful show IP address in serial monitor
@@ -62,12 +90,14 @@ void setup() {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());  //IP address assigned to your ESP
+  printDisplay("Connected, IP: " + WiFi.localIP());
 }
 
 //=======================================================================
 //                    Main Program Loop
 //=======================================================================
 void loop() {
+  digitalWrite(SSID_STAT, ((WiFi.status() == WL_CONNECTED ? HIGH : LOW)));
   WiFiClientSecure httpsClient;    //Declare object of class WiFiClient
 
   Serial.println(host);
@@ -75,34 +105,36 @@ void loop() {
   Serial.printf("Using fingerprint '%s'\n", fingerprint);
   httpsClient.setFingerprint(fingerprint);
   httpsClient.setTimeout(1000); // 10 Seconds
+  printDisplay("Connecting to host..");
   delay(500);
-
   Serial.print("HTTPS Connecting");
   int r = 0; //retry counter
   while ((!httpsClient.connect(host, httpsPort)) && (r < 30)) {
-    delay(100);
+    delay(50);
     Serial.print(".");
     r++;
   }
   Serial.println("");
   if (r == 30) {
     Serial.println("Connection failed");
-  }
-  else {
+  }  else {
     Serial.println("Connected to web");
   }
 
-  String ADCData, getData, Link;
-  int adcvalue = analogRead(A0); //Read Analog value of LDR
-  ADCData = String(adcvalue);   //String to interger conversion
+  //  String ADCData, getData, Link;
+  //  int adcvalue = analogRead(A0); //Read Analog value of LDR
+  //  ADCData = String(adcvalue);   //String to interger conversion
 
   //GET Data
-  Link = "/s.json";//"/get?foo1=bar1&foo2=bar2";//"v1beta1/projects/chan-78/databases/(default)/documents/s";
+  String link = "/";
+  link += deviceId;
+  link += ".json";
 
+  printDisplay("Requesting data..");
   Serial.print("requesting URL: ");
-  Serial.println(host + Link);
+  Serial.println(host + link);
 
-  httpsClient.print(String("GET ") + Link + " HTTP/1.1\r\n" +
+  httpsClient.print(String("GET ") + link + " HTTP/1.1\r\n" +
                     "Host: " + host + "\r\n" +
                     "Connection: close\r\n\r\n");
 
@@ -120,7 +152,7 @@ void loop() {
   Serial.println("==========");
   String line = "";
   while (httpsClient.available()) {
-    line += httpsClient.readStringUntil('\n');  //Read Line by Line
+    line = httpsClient.readString();//readStringUntil('\n');  //Read Line by Line
   }
   Serial.println(line); //Print response
   Serial.println("==========");
@@ -132,12 +164,12 @@ void loop() {
 
     deserializeJson(doc, line);
 
-    bool a = doc["a"]; // true
-    bool b = doc["b"]; // false
-    bool c = doc["c"]; // false
-    bool d = doc["d"]; // false
-    bool e = doc["e"]; // false
-    bool f = doc["f"]; // false
+     a = doc["a"]; // true
+     b = doc["b"]; // false
+     c = doc["c"]; // false
+     d = doc["d"]; // false
+     e = doc["e"]; // false
+     f = doc["f"]; // false
 
     digitalWrite(CH_A, ( a ? HIGH : LOW));
     digitalWrite(CH_B, ( b ? HIGH : LOW));
@@ -147,6 +179,59 @@ void loop() {
     digitalWrite(CH_F, ( f ? HIGH : LOW));
 
     Serial.println("Reply was: " + httpsClient.readString());
+
+    printDisplay("Data fetched.");
+    //delay(500);  //GET Data at every 2 seconds
   }
-  //delay(500);  //GET Data at every 2 seconds
+}
+void printDisplay(String inf) {
+  display.clearDisplay();
+  display.setCursor(0, 0);
+  display.print(inf);
+  display.print("\r\n");
+  display.print("WiFi: ");
+  display.print(ssid);
+  display.print((WiFi.status() == WL_CONNECTED ? "*\r\n" : "\r\n"));
+  display.print("Pw: ");
+  display.print(password);
+  display.print("\r\n");
+  display.print("Device: ");
+  display.print(deviceId);
+  if (a) {
+    display.fillCircle(123, 60, 2, WHITE);
+  } else {
+    display.drawCircle(123, 60, 2, WHITE);
+  }
+  if (b) {
+    display.fillCircle(123, 54, 2, WHITE);
+  } else {
+    display.drawCircle(123, 54, 2, WHITE);
+  }
+  if (c) {
+    display.fillCircle(123, 48, 2, WHITE);
+  } else {
+    display.drawCircle(123, 48, 2, WHITE);
+  }
+  if (d) {
+    display.fillCircle(123, 42, 2, WHITE);
+  } else {
+    display.drawCircle(123, 42, 2, WHITE);
+  }
+  if (e) {
+    display.fillCircle(123, 36, 2, WHITE);
+  } else {
+    display.drawCircle(123, 36, 2, WHITE);
+  }
+  if (f) {
+    display.fillCircle(123, 30, 2, WHITE);
+  } else {
+    display.drawCircle(123, 30, 2, WHITE);
+  }
+  display.display(); // actually display all of the above
+}
+void initDisplay() {
+  display.setTextSize(1);
+  display.setTextColor(SSD1306_WHITE);
+  display.setCursor(0, 0);
+  display.display();
 }
