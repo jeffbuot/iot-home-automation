@@ -1,4 +1,6 @@
 <resources>
     <string name="app_name">HomeAutomation</string>
     <string name="home_automation_switches">Home Automation Switches</string>
+    <string name="device_id_key">device_id_key</string>
+    <string name="switch_device">Switch Device</string>
 </resources>

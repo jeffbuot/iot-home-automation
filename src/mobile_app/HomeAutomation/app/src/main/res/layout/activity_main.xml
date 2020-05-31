@@ -8,13 +8,47 @@
     tools:context=".MainActivity">
 
     <LinearLayout
+        android:id="@+id/layoutSwitches"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintBottom_toTopOf="@+id/btnSwitchDevice"
+        app:layout_constraintTop_toBottomOf="@+id/txtDeviceId">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutLoading"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="10dp">
+
+            <ProgressBar
+                android:id="@+id/progressBar"
+                style="@android:style/Widget.DeviceDefault.Light.ProgressBar.Large"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                app:layout_constraintBottom_toTopOf="@+id/txtLoad"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <TextView
+                android:id="@+id/txtLoad"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="8dp"
+                android:text="Connecting to cloud..."
+                android:textColor="@color/black"
+                android:textSize="24sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutSwitchA"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp">
@@ -38,7 +72,7 @@
                     android:checked="false"
                     android:soundEffectsEnabled="true"
                     android:textOff=""
-                    android:textOn=""/>
+                    android:textOn="" />
 
                 <TextView
                     android:id="@+id/textViewa"
@@ -48,6 +82,7 @@
                     android:text="Switch A"
                     android:textAlignment="center"
                     android:textAllCaps="true"
+                    android:textColor="@color/black"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -71,7 +106,7 @@
                     android:checked="false"
                     android:soundEffectsEnabled="true"
                     android:textOff=""
-                    android:textOn=""/>
+                    android:textOn="" />
 
                 <TextView
                     android:id="@+id/textViewb"
@@ -81,6 +116,7 @@
                     android:text="Switch B"
                     android:textAlignment="center"
                     android:textAllCaps="true"
+                    android:textColor="@color/black"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -88,6 +124,7 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/layoutSwitchB"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="10dp">
@@ -111,7 +148,7 @@
                     android:checked="false"
                     android:soundEffectsEnabled="true"
                     android:textOff=""
-                    android:textOn=""/>
+                    android:textOn="" />
 
                 <TextView
                     android:id="@+id/textViewc"
@@ -121,6 +158,7 @@
                     android:text="Switch C"
                     android:textAlignment="center"
                     android:textAllCaps="true"
+                    android:textColor="@color/black"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -144,7 +182,7 @@
                     android:checked="false"
                     android:soundEffectsEnabled="true"
                     android:textOff=""
-                    android:textOn=""/>
+                    android:textOn="" />
 
                 <TextView
                     android:id="@+id/textViewd"
@@ -154,78 +192,7 @@
                     android:text="Switch D"
                     android:textAlignment="center"
                     android:textAllCaps="true"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-        </androidx.constraintlayout.widget.ConstraintLayout>
-        <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp">
-
-            <LinearLayout
-                android:id="@+id/layoute"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toStartOf="@+id/layoutf"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ToggleButton
-                    android:id="@+id/toggle_e"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/sw_off"
-                    android:checked="false"
-                    android:soundEffectsEnabled="true"
-                    android:textOff=""
-                    android:textOn=""/>
-
-                <TextView
-                    android:id="@+id/textViewe"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="Switch E"
-                    android:textAlignment="center"
-                    android:textAllCaps="true"
-                    android:textSize="15sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/layoutf"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:orientation="vertical"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@+id/layoute"
-                app:layout_constraintTop_toTopOf="parent">
-
-                <ToggleButton
-                    android:id="@+id/toggle_f"
-                    android:layout_width="100dp"
-                    android:layout_height="100dp"
-                    android:layout_margin="10dp"
-                    android:background="@drawable/sw_off"
-                    android:checked="false"
-                    android:soundEffectsEnabled="true"
-                    android:textOff=""
-                    android:textOn=""/>
-
-                <TextView
-                    android:id="@+id/textViewf"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="Switch F"
-                    android:textAlignment="center"
-                    android:textAllCaps="true"
+                    android:textColor="@color/black"
                     android:textSize="15sp"
                     android:textStyle="bold" />
             </LinearLayout>
@@ -233,6 +200,29 @@
         </androidx.constraintlayout.widget.ConstraintLayout>
     </LinearLayout>
 
+    <TextView
+        android:id="@+id/txtDeviceId"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="[device id]"
+        android:textColor="@color/black"
+        android:textSize="18sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/btnSwitchDevice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
+        android:text="@string/switch_device"
+        android:textSize="18sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>

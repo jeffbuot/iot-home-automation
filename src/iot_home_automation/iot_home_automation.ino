@@ -27,21 +27,22 @@ const char *deviceId = "shsd-01";
 
 //Link to read data from https://jsonplaceholder.typicode.com/comments?postId=7
 //Web/Server address to read/write from
-const char *host = "chan-78.firebaseio.com";//"postman-echo.com";
+//https://chan-78.firebaseio.com/s/shsd-01.json
+const char *host = "chan-78.firebaseio.com";// "firestore.googleapis.com"; ////"postman-echo.com";
 const int httpsPort = 443;  //HTTPS= 443 and HTTP = 80
 
 //SHA1 finger print of certificate use web browser to view and copy
-const char fingerprint[] PROGMEM = "B6 F5 80 C8 B1 DA 61 C1 07 9D 80 42 D8 A9 1F AF 9F C8 96 7D";//"B5 32 1E 55 8E F7 29 81 22 A4 DA 78 97 EA 8A 27 82 A8 F5 1C";
+const char fingerprint[] PROGMEM = "03 D6 42 23 03 D1 0C 06 73 F7 E2 BD 29 47 13 C3 22 71 37 1B";//"56 FA EB AE 23 B9 95 2C 83 18 3A 8F EA 06 6E 26 C5 66 2B 83";//"B6 F5 80 C8 B1 DA 61 C1 07 9D 80 42 D8 A9 1F AF 9F C8 96 7D";//"B5 32 1E 55 8E F7 29 81 22 A4 DA 78 97 EA 8A 27 82 A8 F5 1C";
 //=======================================================================
 //                    Power on setup
 //=======================================================================
 int SSID_STAT = 16;
-int CH_A = 0;
-int CH_B = 2;
-int CH_C = 14;
-int CH_D = 12;
-int CH_E = 13;
-int CH_F = 15;
+int CH_A = 14;
+int CH_B = 12;
+int CH_C = 13;
+int CH_D = 15;
+int CH_E = 0;
+int CH_F = 2;
 bool a, b, c, d, e, f;
 void setup() {
   pinMode(SSID_STAT, OUTPUT);
@@ -126,7 +127,7 @@ void loop() {
   //  ADCData = String(adcvalue);   //String to interger conversion
 
   //GET Data
-  String link = "/";
+  String link = "/";//"/";
   link += deviceId;
   link += ".json";
 
@@ -152,24 +153,33 @@ void loop() {
   Serial.println("==========");
   String line = "";
   while (httpsClient.available()) {
-    line = httpsClient.readString();//readStringUntil('\n');  //Read Line by Line
+    line = httpsClient.readStringUntil('\n');  //Read Line by Line
   }
   Serial.println(line); //Print response
   Serial.println("==========");
   Serial.println("closing connection");
 
   if (line != "") {
-    const size_t capacity = JSON_OBJECT_SIZE(6) + 20 ;
+    const size_t capacity = 6 * JSON_OBJECT_SIZE(1) + JSON_OBJECT_SIZE(4) + JSON_OBJECT_SIZE(6) + 270;
     DynamicJsonDocument doc(capacity);
+    //    const size_t capacity = JSON_OBJECT_SIZE(6) + 20 ;
+    //    DynamicJsonDocument doc(capacity);
 
     deserializeJson(doc, line);
 
-     a = doc["a"]; // true
-     b = doc["b"]; // false
-     c = doc["c"]; // false
-     d = doc["d"]; // false
-     e = doc["e"]; // false
-     f = doc["f"]; // false
+//    JsonObject fields = doc["fields"];
+//    f = fields["f"]["booleanValue"]; // true
+//    c = fields["c"]["booleanValue"]; // true
+//    d = fields["d"]["booleanValue"]; // true
+//    e = fields["e"]["booleanValue"]; // true
+//    a = fields["a"]["booleanValue"]; // true
+//    b = fields["b"]["booleanValue"]; // true
+        a = doc["a"];
+        b = doc["b"]; 
+        c = doc["c"]; 
+        d = doc["d"]; 
+        e = doc["e"]; 
+        f = doc["f"]; 
 
     digitalWrite(CH_A, ( a ? HIGH : LOW));
     digitalWrite(CH_B, ( b ? HIGH : LOW));
@@ -178,10 +188,9 @@ void loop() {
     digitalWrite(CH_E, ( e ? HIGH : LOW));
     digitalWrite(CH_F, ( f ? HIGH : LOW));
 
-    Serial.println("Reply was: " + httpsClient.readString());
+    Serial.println("Reply was: " + line);
 
     printDisplay("Data fetched.");
-    //delay(500);  //GET Data at every 2 seconds
   }
 }
 void printDisplay(String inf) {
@@ -197,32 +206,32 @@ void printDisplay(String inf) {
   display.print("\r\n");
   display.print("Device: ");
   display.print(deviceId);
-  if (a) {
+  if (f) {
     display.fillCircle(123, 60, 2, WHITE);
   } else {
     display.drawCircle(123, 60, 2, WHITE);
   }
-  if (b) {
+  if (e) {
     display.fillCircle(123, 54, 2, WHITE);
   } else {
     display.drawCircle(123, 54, 2, WHITE);
   }
-  if (c) {
+  if (d) {
     display.fillCircle(123, 48, 2, WHITE);
   } else {
     display.drawCircle(123, 48, 2, WHITE);
   }
-  if (d) {
+  if (c) {
     display.fillCircle(123, 42, 2, WHITE);
   } else {
     display.drawCircle(123, 42, 2, WHITE);
   }
-  if (e) {
+  if (b) {
     display.fillCircle(123, 36, 2, WHITE);
   } else {
     display.drawCircle(123, 36, 2, WHITE);
   }
-  if (f) {
+  if (a) {
     display.fillCircle(123, 30, 2, WHITE);
   } else {
     display.drawCircle(123, 30, 2, WHITE);
