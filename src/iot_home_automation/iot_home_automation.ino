@@ -21,8 +21,8 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 /* Set these to your desired credentials. */
-const char *ssid = "SHSD-01";  //ENTER YOUR WIFI SETTINGS
-const char *password = "WKSHSD001";
+const char *ssid = "ZLT P21_00AFD1";  //ENTER YOUR WIFI SETTINGS
+const char *password = "6BF062E3";
 const char *deviceId = "shsd-01";
 
 //Link to read data from https://jsonplaceholder.typicode.com/comments?postId=7
