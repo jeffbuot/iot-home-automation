@@ -20,6 +20,7 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ListView;
 import android.widget.ProgressBar;
+import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
@@ -64,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     ToggleButton toggle_b;
     ToggleButton toggle_c;
     ToggleButton toggle_d;
+    ToggleButton toggle_e;
+    ToggleButton toggle_f;
     MediaPlayer onSound;
     MediaPlayer offSound;
     Button btnSwitchDevice;
@@ -72,11 +75,17 @@ public class MainActivity extends AppCompatActivity {
     TextView txtB;
     TextView txtC;
     TextView txtD;
+    TextView txtE;
+    TextView txtF;
     Switch switches;
     //boolean isLoading = true;
     ConstraintLayout layoutLoading;
-    ConstraintLayout layoutSwitchA;
-    ConstraintLayout layoutSwitchB;
+//    ConstraintLayout layoutSwitchA;
+//    ConstraintLayout layoutSwitchB;
+//    ConstraintLayout layoutSwitchC;
+//    ConstraintLayout layoutLabel1;
+//    ConstraintLayout layoutLabel2;
+    ScrollView scrollView;
     TextView txtLoading;
     ProgressBar progressBar;
 
@@ -93,11 +102,17 @@ public class MainActivity extends AppCompatActivity {
         txtB = findViewById(R.id.textViewb);
         txtC = findViewById(R.id.textViewc);
         txtD = findViewById(R.id.textViewd);
+        txtE = findViewById(R.id.textViewe);
+        txtF = findViewById(R.id.textViewf);
         btnSwitchDevice = findViewById(R.id.btnSwitchDevice);
         txtDeviceId = findViewById(R.id.txtDeviceId);
 
-        layoutSwitchA = findViewById(R.id.layoutSwitchA);
-        layoutSwitchB = findViewById(R.id.layoutSwitchB);
+        scrollView = findViewById(R.id.scrollLayoutButtons);
+//        layoutSwitchA = findViewById(R.id.layoutSwitchA);
+//        layoutSwitchB = findViewById(R.id.layoutSwitchB);
+//        layoutSwitchC = findViewById(R.id.layoutSwitchC);
+//        layoutLabel1 = findViewById(R.id.layoutLabel1);
+//        layoutLabel2 = findViewById(R.id.layoutLabel2);
         layoutLoading = findViewById(R.id.layoutLoading);
         txtLoading = findViewById(R.id.txtLoad);
         progressBar = findViewById(R.id.progressBar);
@@ -185,7 +200,34 @@ public class MainActivity extends AppCompatActivity {
 //                setCustomDrawable(buttonView, isChecked);
             }
         });
-
+        toggle_e = findViewById(R.id.toggle_e);
+        toggle_e.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                switches.setE(isChecked);
+                myRef.setValue(switches);
+                setCustomDrawable(buttonView, isChecked);
+//                if (!isLoading) {
+//                    switches.setD(isChecked);
+//                    updateFirebaseSwitches(switches);
+//                }
+//                setCustomDrawable(buttonView, isChecked);
+            }
+        });
+        toggle_f = findViewById(R.id.toggle_f);
+        toggle_f.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                switches.setF(isChecked);
+                myRef.setValue(switches);
+                setCustomDrawable(buttonView, isChecked);
+//                if (!isLoading) {
+//                    switches.setD(isChecked);
+//                    updateFirebaseSwitches(switches);
+//                }
+//                setCustomDrawable(buttonView, isChecked);
+            }
+        });
     }
 
     private void checkDeviceId() {
@@ -203,13 +245,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void showSwitches() {
-        layoutSwitchA.setVisibility(View.VISIBLE);
-        layoutSwitchB.setVisibility(View.VISIBLE);
+        scrollView.setVisibility(View.VISIBLE);
+//        layoutSwitchA.setVisibility(View.VISIBLE);
+//        layoutSwitchB.setVisibility(View.VISIBLE);
+//        layoutSwitchC.setVisibility(View.VISIBLE);
+//        layoutLabel1.setVisibility(View.VISIBLE);
+//        layoutLabel2.setVisibility(View.VISIBLE);
     }
 
     private void hideSwitches() {
-        layoutSwitchA.setVisibility(View.GONE);
-        layoutSwitchB.setVisibility(View.GONE);
+        scrollView.setVisibility(View.GONE);
+//        layoutSwitchA.setVisibility(View.GONE);
+//        layoutSwitchB.setVisibility(View.GONE);
+//        layoutSwitchC.setVisibility(View.GONE);
+//        layoutLabel1.setVisibility(View.GONE);
+//        layoutLabel2.setVisibility(View.GONE);
     }
 
     private void showStatus(String loadingText, boolean showProgress) {
