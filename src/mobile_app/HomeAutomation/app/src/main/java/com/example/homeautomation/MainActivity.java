@@ -1,66 +1,51 @@
 package com.example.homeautomation;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.media.MediaPlayer;
-import android.opengl.Visibility;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.android.volley.Request;
-import com.android.volley.RequestQueue;
-import com.android.volley.Response;
-import com.android.volley.VolleyError;
-import com.android.volley.toolbox.StringRequest;
-import com.android.volley.toolbox.Volley;
-import com.example.homeautomation.classes.ApiWrapper;
-import com.example.homeautomation.classes.ChannelData;
+import com.example.homeautomation.classes.ButtonEventLog;
 import com.example.homeautomation.classes.Switch;
 import com.example.homeautomation.customadapters.SwitchListAdapter;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.IOException;
-import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
     // GestureDetector gestureDetector;
     //ListView listView;]
-    private String TAG = "MAIN ACTIVITY";
+    private String TAG = "MAIN_ACTIVITY";
     final String PREFS_NAME = "smarthome_settings";
     String DEVICE_ID = "";
+    String USERNAME = "";
     SwitchListAdapter switchListAdapter;
     // final String[] channelstring = new String[]{"Channel A", "Channel B", "Channel C", "Channel D", "Channel E", "Channel F"};
     FirebaseDatabase database;
-    DatabaseReference myRef;
+    DatabaseReference switchesDbRef;
+    DatabaseReference logsdDbRef;
     ToggleButton toggle_a;
     ToggleButton toggle_b;
     ToggleButton toggle_c;
@@ -70,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
     MediaPlayer onSound;
     MediaPlayer offSound;
     Button btnSwitchDevice;
+    Button btnEventLogs;
     TextView txtDeviceId;
     TextView txtA;
     TextView txtB;
@@ -78,9 +64,10 @@ public class MainActivity extends AppCompatActivity {
     TextView txtE;
     TextView txtF;
     Switch switches;
+    CompoundButton.OnCheckedChangeListener buttonEvent;
     //boolean isLoading = true;
     ConstraintLayout layoutLoading;
-//    ConstraintLayout layoutSwitchA;
+    //    ConstraintLayout layoutSwitchA;
 //    ConstraintLayout layoutSwitchB;
 //    ConstraintLayout layoutSwitchC;
 //    ConstraintLayout layoutLabel1;
@@ -105,19 +92,17 @@ public class MainActivity extends AppCompatActivity {
         txtE = findViewById(R.id.textViewe);
         txtF = findViewById(R.id.textViewf);
         btnSwitchDevice = findViewById(R.id.btnSwitchDevice);
+        btnEventLogs = findViewById(R.id.btnLogs);
+
         txtDeviceId = findViewById(R.id.txtDeviceId);
 
         scrollView = findViewById(R.id.scrollLayoutButtons);
-//        layoutSwitchA = findViewById(R.id.layoutSwitchA);
-//        layoutSwitchB = findViewById(R.id.layoutSwitchB);
-//        layoutSwitchC = findViewById(R.id.layoutSwitchC);
-//        layoutLabel1 = findViewById(R.id.layoutLabel1);
-//        layoutLabel2 = findViewById(R.id.layoutLabel2);
         layoutLoading = findViewById(R.id.layoutLoading);
         txtLoading = findViewById(R.id.txtLoad);
         progressBar = findViewById(R.id.progressBar);
+        USERNAME = (Build.BRAND + "_" + Build.DEVICE + "_" + android.os.Build.MODEL).toUpperCase();
         hideSwitches();
-        showStatus("Connecting to cloud..", true);
+        showStatus("Connecting to cloud..", true, false);
         checkDeviceId();
 
         btnSwitchDevice.setOnClickListener(new View.OnClickListener() {
@@ -127,107 +112,76 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        btnEventLogs.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                goToSEventLogsActivity();
+            }
+        });
         onSound = MediaPlayer.create(this, R.raw.on_sound);
         offSound = MediaPlayer.create(this, R.raw.off_sound);
 
+        buttonEvent = new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                String buttonName = "";
+                if (((CompoundButton) toggle_a).equals(buttonView)) {
+                    switches.setA(isChecked);
+                    buttonName = "switch_a";
+                } else if (((CompoundButton) toggle_b).equals(buttonView)) {
+                    switches.setB(isChecked);
+                    buttonName = "switch_b";
+                } else if (((CompoundButton) toggle_c).equals(buttonView)) {
+                    switches.setC(isChecked);
+                    buttonName = "switch_c";
+                } else if (((CompoundButton) toggle_d).equals(buttonView)) {
+                    switches.setD(isChecked);
+                    buttonName = "switch_d";
+                } else if (((CompoundButton) toggle_e).equals(buttonView)) {
+                    switches.setE(isChecked);
+                    buttonName = "switch_e";
+                } else if (((CompoundButton) toggle_f).equals(buttonView)) {
+                    switches.setF(isChecked);
+                    buttonName = "switch_f";
+                }
+                if (isChecked) {
+                    onSound.start();
+                } else {
+                    offSound.start();
+                }
+                try {
+                    switchesDbRef.setValue(switches);
+
+                    String key = logsdDbRef.push().getKey();
+                    ButtonEventLog log = new ButtonEventLog(key, USERNAME, new Date(), isChecked, buttonName);
+                    Map<String, Object> logValues = log.toMap();
+
+                    Map<String, Object> childUpdates = new HashMap<>();
+                    childUpdates.put("/events/" + key, logValues);
+                    logsdDbRef.updateChildren(childUpdates);
+                } catch (Exception e) {
+                    Toast.makeText(getCurrentContext(), "A problem occured from cloud connection", Toast.LENGTH_SHORT).show();
+                }
+                setCustomDrawable(buttonView, isChecked);
+            }
+        };
         toggle_a = findViewById(R.id.toggle_a);
-        toggle_a.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                switches.setA(isChecked);
-                //Make sure that the rules are set into read: true, and write: true
-                //Catch error using Firebase OnSuccessListener and OnFailureListener
-                myRef.setValue(switches);
-                //Log the transaction if success..
-//                        .addOnSuccessListener(new OnSuccessListener<Void>() {
-//                    @Override
-//                    public void onSuccess(Void aVoid) {
-//                        Log.d(TAG, "Successful Transaction");
-//                    }
-//                })
-//                        //Log the transaction if its failed.
-//                        .addOnFailureListener(new OnFailureListener() {
-//                    @Override
-//                    public void onFailure(@NonNull Exception e) {
-//                        Log.d(TAG, e.getMessage());
-//                    }
-//                });
-                setCustomDrawable(buttonView, isChecked);
-            }
-        });
-
+        toggle_a.setOnCheckedChangeListener(buttonEvent);
         toggle_b = findViewById(R.id.toggle_b);
-        toggle_b.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                switches.setB(isChecked);
-                myRef.setValue(switches);
-                setCustomDrawable(buttonView, isChecked);
-//                if (!isLoading) {
-//                    switches.setB(isChecked);
-//                    updateFirebaseSwitches(switches);
-//                }
-//                setCustomDrawable(buttonView, isChecked);
-            }
-        });
-
+        toggle_b.setOnCheckedChangeListener(buttonEvent);
         toggle_c = findViewById(R.id.toggle_c);
-        toggle_c.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                switches.setC(isChecked);
-                myRef.setValue(switches);
-                setCustomDrawable(buttonView, isChecked);
-//                if (!isLoading) {
-//                    switches.setC(isChecked);
-//                    updateFirebaseSwitches(switches);
-//                }
-//                setCustomDrawable(buttonView, isChecked);
-            }
-        });
-
+        toggle_c.setOnCheckedChangeListener(buttonEvent);
         toggle_d = findViewById(R.id.toggle_d);
-        toggle_d.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                switches.setD(isChecked);
-                myRef.setValue(switches);
-                setCustomDrawable(buttonView, isChecked);
-//                if (!isLoading) {
-//                    switches.setD(isChecked);
-//                    updateFirebaseSwitches(switches);
-//                }
-//                setCustomDrawable(buttonView, isChecked);
-            }
-        });
+        toggle_d.setOnCheckedChangeListener(buttonEvent);
         toggle_e = findViewById(R.id.toggle_e);
-        toggle_e.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                switches.setE(isChecked);
-                myRef.setValue(switches);
-                setCustomDrawable(buttonView, isChecked);
-//                if (!isLoading) {
-//                    switches.setD(isChecked);
-//                    updateFirebaseSwitches(switches);
-//                }
-//                setCustomDrawable(buttonView, isChecked);
-            }
-        });
+        toggle_e.setOnCheckedChangeListener(buttonEvent);
         toggle_f = findViewById(R.id.toggle_f);
-        toggle_f.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                switches.setF(isChecked);
-                myRef.setValue(switches);
-                setCustomDrawable(buttonView, isChecked);
-//                if (!isLoading) {
-//                    switches.setD(isChecked);
-//                    updateFirebaseSwitches(switches);
-//                }
-//                setCustomDrawable(buttonView, isChecked);
-            }
-        });
+        toggle_f.setOnCheckedChangeListener(buttonEvent);
+    }
+
+    private void goToSEventLogsActivity() {
+        Intent intent = new Intent(this, EventLogsActivity.class);
+        startActivity(intent);
     }
 
     private void checkDeviceId() {
@@ -262,10 +216,13 @@ public class MainActivity extends AppCompatActivity {
 //        layoutLabel2.setVisibility(View.GONE);
     }
 
-    private void showStatus(String loadingText, boolean showProgress) {
+    private void showStatus(String loadingText, boolean showProgress, boolean isDeviceNotFound) {
         layoutLoading.setVisibility(View.VISIBLE);
         progressBar.setVisibility(showProgress ? View.VISIBLE : View.GONE);
         txtLoading.setText(loadingText);
+        if (isDeviceNotFound) {
+            txtLoading.setCompoundDrawablesWithIntrinsicBounds(0, R.drawable.ic_android, 0, 0);
+        }
     }
 
     private void hideStatus() {
@@ -278,10 +235,44 @@ public class MainActivity extends AppCompatActivity {
         finish();
     }
 
+    //Sync buttons without affecting the on change event
+    private void syncButtons() {
+        toggle_a.setOnCheckedChangeListener(null);
+        toggle_a.setChecked(switches.isA());
+        setCustomDrawable(toggle_a, switches.isA());
+        toggle_a.setOnCheckedChangeListener(buttonEvent);
+
+        toggle_b.setOnCheckedChangeListener(null);
+        toggle_b.setChecked(switches.isB());
+        setCustomDrawable(toggle_b, switches.isB());
+        toggle_b.setOnCheckedChangeListener(buttonEvent);
+
+        toggle_c.setOnCheckedChangeListener(null);
+        toggle_c.setChecked(switches.isC());
+        setCustomDrawable(toggle_c, switches.isC());
+        toggle_c.setOnCheckedChangeListener(buttonEvent);
+
+        toggle_d.setOnCheckedChangeListener(null);
+        toggle_d.setChecked(switches.isD());
+        setCustomDrawable(toggle_d, switches.isD());
+        toggle_d.setOnCheckedChangeListener(buttonEvent);
+
+        toggle_e.setOnCheckedChangeListener(null);
+        toggle_e.setChecked(switches.isE());
+        setCustomDrawable(toggle_e, switches.isE());
+        toggle_e.setOnCheckedChangeListener(buttonEvent);
+
+        toggle_f.setOnCheckedChangeListener(null);
+        toggle_f.setChecked(switches.isF());
+        setCustomDrawable(toggle_f, switches.isF());
+        toggle_f.setOnCheckedChangeListener(buttonEvent);
+    }
+
     private void connectToCloud() {
         // Write a message to the database
         database = FirebaseDatabase.getInstance();
-        myRef = database.getReference(DEVICE_ID);
+        switchesDbRef = database.getReference(DEVICE_ID);
+        logsdDbRef = database.getReference("event_logs").child(DEVICE_ID);
 //        final AlertDialog al = createWaitDialog();
 //        al.show();
         switches = new Switch(false, false, false, false, false, false);
@@ -291,10 +282,17 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 if (dataSnapshot.getValue() == null) {
-                    showStatus("Device not found.", false);
+                    showStatus("Device [" + DEVICE_ID + "] is not found.", false, true);
                 } else {
+                    switches.setA(dataSnapshot.child("a").getValue(boolean.class));
+                    switches.setB(dataSnapshot.child("b").getValue(boolean.class));
+                    switches.setC(dataSnapshot.child("c").getValue(boolean.class));
+                    switches.setD(dataSnapshot.child("d").getValue(boolean.class));
+                    switches.setE(dataSnapshot.child("e").getValue(boolean.class));
+                    switches.setF(dataSnapshot.child("f").getValue(boolean.class));
                     hideStatus();
                     showSwitches();
+                    syncButtons();
                 }
             }
 
@@ -314,32 +312,37 @@ public class MainActivity extends AppCompatActivity {
 //            }
 //        });
         // Read from the database
-//        myRef.addValueEventListener(new ValueEventListener() {
-//            //            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-////                isLoading = true;
-////                // This method is called once with the initial value and again
-////                // whenever data at this location is updated.
-//                switches.setA(dataSnapshot.child("a").getValue(boolean.class));
-//                switches.setB(dataSnapshot.child("b").getValue(boolean.class));
-//                switches.setC(dataSnapshot.child("c").getValue(boolean.class));
-//                switches.setD(dataSnapshot.child("d").getValue(boolean.class));
-//                switches.setE(dataSnapshot.child("e").getValue(boolean.class));
-//                switches.setF(dataSnapshot.child("f").getValue(boolean.class));
-//                Log.d("MainActivity", "Switches updated: " + switches);
-////                updateButtons(switches);
-////                isLoading = false;
-//            }
-//
-//            //
-//            @Override
-//            public void onCancelled(DatabaseError error) {
-//                // Failed to read value
-//                Log.w("", "Failed to read value.", error.toException());
-//            }
-//        });
+        rootRef.child(DEVICE_ID).addValueEventListener(new ValueEventListener() {
+            //            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+//                isLoading = true;
+//                // This method is called once with the initial value and again
+//                // whenever data at this location is updated.
+                try {
+                    switches.setA(dataSnapshot.child("a").getValue(boolean.class));
+                    switches.setB(dataSnapshot.child("b").getValue(boolean.class));
+                    switches.setC(dataSnapshot.child("c").getValue(boolean.class));
+                    switches.setD(dataSnapshot.child("d").getValue(boolean.class));
+                    switches.setE(dataSnapshot.child("e").getValue(boolean.class));
+                    switches.setF(dataSnapshot.child("f").getValue(boolean.class));
+                    syncButtons();
+                } catch (Exception e) {
+                    Toast.makeText(getCurrentContext(), "A problem occured from cloud connection", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError error) {
+                // Failed to read value
+                Log.w("", "Failed to read value.", error.toException());
+            }
+        });
     }
 
+    private MainActivity getCurrentContext() {
+        return this;
+    }
 //    private void updateButtons(Switch s) {
 //        toggle_a.setChecked(s.isA());
 //        toggle_b.setChecked(s.isB());
@@ -347,17 +350,14 @@ public class MainActivity extends AppCompatActivity {
 //        toggle_d.setChecked(s.isD());
 //    }
 
-//    private void updateFirebaseSwitches(Switch s) {
+    //    private void updateFirebaseSwitches(Switch s) {
 //        myRef.setValue(s);
 //    }
-
     private void setCustomDrawable(CompoundButton buttonView, boolean isChecked) {
         if (isChecked) {
-            onSound.start();
             Drawable d = getResources().getDrawable(R.drawable.sw_on);
             buttonView.setBackground(d);
         } else {
-            offSound.start();
             Drawable d = getResources().getDrawable(R.drawable.sw_off);
             buttonView.setBackground(d);
         }

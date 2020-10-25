@@ -1,6 +1,7 @@
 <resources>
-    <string name="app_name">HomeAutomation</string>
+    <string name="app_name">Smart Home</string>
     <string name="home_automation_switches">Home Automation Switches</string>
     <string name="device_id_key">device_id_key</string>
-    <string name="switch_device">Switch Device</string>
+    <string name="switch_device">Change Device</string>
+    <string name="logs">Button Logs</string>
 </resources>

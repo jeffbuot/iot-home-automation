@@ -43,7 +43,7 @@ public class SetupActivity extends AppCompatActivity {
         } else {
             SharedPreferences settings = getSharedPreferences(PREFS_NAME, 0);
             SharedPreferences.Editor editor = settings.edit();
-            String v = editText.getText().toString();
+            String v = editText.getText().toString().trim();
             String k = getResources().getString(R.string.device_id_key);
             editor.putString(k, v);
             editor.commit();
