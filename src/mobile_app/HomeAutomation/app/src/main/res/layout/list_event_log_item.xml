@@ -34,6 +34,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:padding="2dp"
+            android:textColor="@color/darkGray"
             android:text="[datetime]" />
 
         <TextView
@@ -42,7 +43,7 @@
             android:layout_height="wrap_content"
             android:padding="2dp"
             android:textStyle="bold"
-            android:textColor="@color/white"
+            android:textColor="@color/black"
             android:layout_marginLeft="4dp"
             android:text="[device_name] turned [switch_name] -> [status]" />
     </LinearLayout>
