@@ -46,7 +46,7 @@ public class ButtonEventLog {
 
     @Exclude
     public String getDateString(){
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+        SimpleDateFormat formatter = new SimpleDateFormat("dd-MM-yyyy\nHH:mm:ss");
         return formatter.format(date);
     }
 }
