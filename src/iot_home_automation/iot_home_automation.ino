@@ -21,8 +21,8 @@
 Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
 
 /* Set these to your desired credentials. */
-const char *ssid = "ZLT P21_00AFD1";  //ENTER YOUR WIFI SETTINGS
-const char *password = "6BF062E3";
+const char *ssid = "Love";  //ENTER YOUR WIFI SETTINGS
+const char *password = "JesusIsWayTruthLife!7";
 const char *deviceId = "shsd-01";
 
 //Link to read data from https://jsonplaceholder.typicode.com/comments?postId=7
@@ -32,7 +32,7 @@ const char *host = "chan-78.firebaseio.com";// "firestore.googleapis.com"; ////"
 const int httpsPort = 443;  //HTTPS= 443 and HTTP = 80
 
 //SHA1 finger print of certificate use web browser to view and copy
-const char fingerprint[] PROGMEM = "50 89 50 57 90 1F 37 E3 B8 F3 5B 02 ED 3A 65 6E 6A 34 DB 93";//"03 D6 42 23 03 D1 0C 06 73 F7 E2 BD 29 47 13 C3 22 71 37 1B";//"56 FA EB AE 23 B9 95 2C 83 18 3A 8F EA 06 6E 26 C5 66 2B 83";//"B6 F5 80 C8 B1 DA 61 C1 07 9D 80 42 D8 A9 1F AF 9F C8 96 7D";//"B5 32 1E 55 8E F7 29 81 22 A4 DA 78 97 EA 8A 27 82 A8 F5 1C";
+const char fingerprint[] PROGMEM = "4A 13 45 C9 71 9D CF A6 33 F1 F8 F0 1E 88 23 88 AC D6 2A 02";
 //=======================================================================
 //                    Power on setup
 //=======================================================================
@@ -91,7 +91,7 @@ void setup() {
   Serial.println(ssid);
   Serial.print("IP address: ");
   Serial.println(WiFi.localIP());  //IP address assigned to your ESP
-  printDisplay("Connected, IP: " + WiFi.localIP());
+  //printDisplay(WiFi.localIP());
 }
 
 //=======================================================================

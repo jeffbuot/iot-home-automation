@@ -92,7 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:fontFamily="monospace"
-                    android:text="2000 Watts Outlet"
+                    android:text="6000 Watts Outlet"
                     android:textAlignment="center"
                     android:textAllCaps="true"
                     android:textColor="@color/black"
@@ -262,24 +262,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_marginTop="20dp"
-                android:layout_marginBottom="-10dp">
-
-                <TextView
-                    android:id="@+id/txtOutletLabel2"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="monospace"
-                    android:text="6000 Watts Outlet"
-                    android:textAlignment="center"
-                    android:textAllCaps="true"
-                    android:textColor="@color/black"
-                    android:textSize="17sp"
-                    android:textStyle="bold"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-            </androidx.constraintlayout.widget.ConstraintLayout>
+                android:layout_marginBottom="-10dp"/>
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/layoutSwitchC"
